@@ -46,9 +46,7 @@ export const useGameStore = defineStore({
         hearts: 0,
         field: field,
         playerPos: [0, 0],
-        timerInterval: setInterval(() => {
-          this.timer++;
-        }, 1000),
+        timerInterval: null,
       });
     },
   },

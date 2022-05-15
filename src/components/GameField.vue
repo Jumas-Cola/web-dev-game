@@ -54,7 +54,7 @@ export default {
         this.game.field[this.game.playerPos[0]][this.game.playerPos[1] + 1]
           .type;
       if (cellType == 'heart') {
-        this.game.hearts++;
+        this.game.$patch({ hearts: this.game.hearts + 1 });
       } else if (cellType == 'stone') {
         return;
       }
@@ -72,7 +72,7 @@ export default {
         this.game.field[this.game.playerPos[0]][this.game.playerPos[1] - 1]
           .type;
       if (cellType == 'heart') {
-        this.game.hearts++;
+        this.game.$patch({ hearts: this.game.hearts + 1 });
       } else if (cellType == 'stone') {
         return;
       }
@@ -90,7 +90,7 @@ export default {
         this.game.field[this.game.playerPos[0] + 1][this.game.playerPos[1]]
           .type;
       if (cellType == 'heart') {
-        this.game.hearts++;
+        this.game.$patch({ hearts: this.game.hearts + 1 });
       } else if (cellType == 'stone') {
         return;
       }
@@ -108,7 +108,7 @@ export default {
         this.game.field[this.game.playerPos[0] - 1][this.game.playerPos[1]]
           .type;
       if (cellType == 'heart') {
-        this.game.hearts++;
+        this.game.$patch({ hearts: this.game.hearts + 1 });
       } else if (cellType == 'stone') {
         return;
       }

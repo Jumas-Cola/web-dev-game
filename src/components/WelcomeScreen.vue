@@ -20,7 +20,8 @@ import { useGameStore } from '@/stores/game';
             placeholder="Username"
             required
             autofocus
-            v-model="name"
+            :value="name"
+            @input="(event) => (name = event.target.value)"
             v-on:keyup.enter="start"
           />
           <button type="button" :disabled="!name" @click="start">Start</button>
@@ -47,7 +48,7 @@ export default {
         return;
       }
       this.game.name = this.name;
-      this.game.started = true;
+      this.game.$patch({ started: true });
       this.isActive = false;
     },
   },

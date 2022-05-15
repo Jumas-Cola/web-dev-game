@@ -63,15 +63,22 @@ export default {
   created() {
     this.game = useGameStore();
     this.game.$subscribe((mutation, state) => {
+      if (mutation.payload === undefined) {
+        return;
+      }
+
       if (
-        mutation.events.key === 'started' &&
-        mutation.events.newValue === true
+        mutation.payload.started !== undefined &&
+        mutation.payload.started === true
       ) {
         this.timer();
-      } else if (mutation.events.key === 'type' && this.game.hearts === 10) {
+      } else if (
+        mutation.payload.hearts !== undefined &&
+        this.game.hearts === 10
+      ) {
         clearInterval(this.game.timerInterval);
-        this.game.started = false;
-      } else if (mutation.events.key === 'timer') {
+        this.game.$patch({ started: false });
+      } else if (mutation.payload.timer !== undefined) {
         let newField = JSON.parse(JSON.stringify(this.game.field));
         for (let i = 0, len = this.game.field.length; i < len; i++) {
           for (let j = 0, len = this.game.field[0].length; j < len; j++) {
@@ -82,7 +89,7 @@ export default {
                   newField[i + 1][j].type = 'heart';
                 } else if (this.game.field[i + 1][j].type == 'player') {
                   newField[i][j].type = 'empty';
-                  this.game.hearts++;
+                  this.game.$patch({ hearts: this.game.hearts + 1 });
                 }
               }
             } else if (this.game.field[i][j].type == 'stone') {
@@ -93,9 +100,9 @@ export default {
                 } else if (this.game.field[i + 1][j].type == 'player') {
                   newField[i][j].type = 'empty';
                   newField[i + 1][j].type = 'stone';
-                  this.game.gameOver = true;
+                  this.game.$patch({ gameOver: true });
                   clearInterval(this.game.timerInterval);
-                  this.game.started = false;
+                  this.game.$patch({ started: false });
                 }
               }
             }
@@ -108,7 +115,7 @@ export default {
   methods: {
     timer() {
       this.game.timerInterval = setInterval(() => {
-        this.game.timer++;
+        this.game.$patch({ timer: this.game.timer + 1 });
       }, 1000);
     },
   },

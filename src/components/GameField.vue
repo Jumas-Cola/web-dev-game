@@ -30,15 +30,19 @@ export default {
       if (this.game.started) {
         switch (e.key) {
           case 'd':
+          case "ArrowRight":
             this.walkRight();
             break;
           case 'a':
+          case "ArrowLeft":
             this.walkLeft();
             break;
           case 's':
+          case "ArrowDown":
             this.walkDown();
             break;
           case 'w':
+          case "ArrowUp":
             this.walkUp();
             break;
         }

@@ -3,8 +3,17 @@ import WelcomeScreen from './components/WelcomeScreen.vue';
 import RatingScreen from './components/RatingScreen.vue';
 import GameField from './components/GameField.vue';
 import LossScreen from './components/LossScreen.vue';
-import WinScreen from './components/WinScreen.vue';
 import { useGameStore } from '@/stores/game';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 </script>
 
 <template>
@@ -17,9 +26,6 @@ import { useGameStore } from '@/stores/game';
 
     <!-- Loss (death) screen -->
     <LossScreen />
-
-    <!-- Win screen -->
-    <WinScreen />
 
     <!-- Main game container -->
     <div class="game">
@@ -61,6 +67,14 @@ import { useGameStore } from '@/stores/game';
 <script>
 export default {
   created() {
+    this.firebaseConfig = {
+      apiKey: 'AIzaSyCtLC5neiajBKkPMPYbzcNrm3ag5w1K-lU',
+      authDomain: 'web-design-life-saver.firebaseapp.com',
+      projectId: 'web-design-life-saver',
+      storageBucket: 'web-design-life-saver.appspot.com',
+      messagingSenderId: '795124124689',
+      appId: '1:795124124689:web:0b94798305bd9a8ed375b0',
+    };
     this.game = useGameStore();
     this.game.$subscribe((mutation, state) => {
       if (mutation.payload === undefined) {
@@ -76,8 +90,7 @@ export default {
         mutation.payload.hearts !== undefined &&
         this.game.hearts === 10
       ) {
-        clearInterval(this.game.timerInterval);
-        this.game.$patch({ started: false });
+        this.gameWon();
       } else if (mutation.payload.timer !== undefined) {
         let newField = JSON.parse(JSON.stringify(this.game.field));
         for (let i = 0, len = this.game.field.length; i < len; i++) {
@@ -100,9 +113,7 @@ export default {
                 } else if (this.game.field[i + 1][j].type == 'player') {
                   newField[i][j].type = 'empty';
                   newField[i + 1][j].type = 'stone';
-                  this.game.$patch({ gameOver: true });
-                  clearInterval(this.game.timerInterval);
-                  this.game.$patch({ started: false });
+                  this.gameOver();
                 }
               }
             }
@@ -117,6 +128,34 @@ export default {
       this.game.timerInterval = setInterval(() => {
         this.game.$patch({ timer: this.game.timer + 1 });
       }, 1000);
+    },
+    gameOver() {
+      this.game.$patch({ gameOver: true });
+      clearInterval(this.game.timerInterval);
+      this.game.$patch({ started: false });
+    },
+    async gameWon() {
+      const firebaseApp = initializeApp(this.firebaseConfig);
+      const db = getFirestore(firebaseApp);
+
+      clearInterval(this.game.timerInterval);
+      this.game.$patch({ started: false });
+
+      try {
+        const docRef = await addDoc(collection(db, 'scores'), {
+          name: this.game?.name,
+          score: this.game?.timer,
+        });
+      } catch (e) {}
+
+      const scoresRef = collection(db, 'scores');
+      const q = query(scoresRef, orderBy('score'), limit(10));
+      const querySnapshot = await getDocs(q);
+      let scores = [];
+      querySnapshot.forEach((item) => {
+        scores.push({ name: item.data().name, score: item.data().score });
+      });
+      this.game.highScores = scores;
     },
   },
 };

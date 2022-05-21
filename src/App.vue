@@ -4,7 +4,6 @@ import RatingScreen from './components/RatingScreen.vue';
 import GameField from './components/GameField.vue';
 import LossScreen from './components/LossScreen.vue';
 import { useGameStore } from '@/stores/game';
-import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import {
   collection,
@@ -14,6 +13,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
+import { firebaseApp } from './firebase-init.js';
 </script>
 
 <template>
@@ -67,14 +67,6 @@ import {
 <script>
 export default {
   created() {
-    this.firebaseConfig = {
-      apiKey: 'AIzaSyCtLC5neiajBKkPMPYbzcNrm3ag5w1K-lU',
-      authDomain: 'web-design-life-saver.firebaseapp.com',
-      projectId: 'web-design-life-saver',
-      storageBucket: 'web-design-life-saver.appspot.com',
-      messagingSenderId: '795124124689',
-      appId: '1:795124124689:web:0b94798305bd9a8ed375b0',
-    };
     this.game = useGameStore();
     this.game.$subscribe((mutation, state) => {
       if (mutation.payload === undefined) {
@@ -135,7 +127,6 @@ export default {
       this.game.$patch({ started: false });
     },
     async gameWon() {
-      const firebaseApp = initializeApp(this.firebaseConfig);
       const db = getFirestore(firebaseApp);
 
       clearInterval(this.game.timerInterval);
